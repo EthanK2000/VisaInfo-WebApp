@@ -1,0 +1,22 @@
+version: '3'
+services:
+  app:
+    build: ./app
+    container_name: visainfo-webapp
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8501:8501"
+    command: streamlit run app.py
+
+  nginx:
+    build: ./nginx
+    container_name: visainfo-webapp-nginx
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+    depends_on:
+      - app

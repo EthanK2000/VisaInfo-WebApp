@@ -21,9 +21,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 if 'countryData' not in st.session_state:
-    res = requests.get(os.environ["VISAINFO_ENDPOINT"]+"getcountries")
+    res = requests.get(os.environ["VISAINFO_API_ENDPOINT"]+"getcountries")
     countryData = res.json()
-    st.session_state['countryData'] = requests.get(os.environ["VISAINFO_ENDPOINT"]+"getcountries").json()
+    st.session_state['countryData'] = requests.get(os.environ["VISAINFO_API_ENDPOINT"]+"getcountries").json()
 
 def restart():
     for key in st.session_state.keys():
@@ -40,7 +40,8 @@ def generate_visa_info():
     st.session_state['state'] = 1
     generic_message = f"I am travelling to {st.session_state['destination']} with a {st.session_state['passport']} passport, do I need to get a visa?"
     st.session_state['user']["messages"].append({"role": "user", "content": generic_message})
-    res = requests.post(os.environ["VISAINFO_ENDPOINT"]+"queryvisainfo", json = {
+    print(os.environ["VISAINFO_API_ENDPOINT"]+"queryvisainfo")
+    res = requests.post(os.environ["VISAINFO_API_ENDPOINT"]+"queryvisainfo", json = {
         "query": generic_message,
         "destination": st.session_state['destination'],
         "passport": st.session_state['passport'],
@@ -53,7 +54,7 @@ def generate_visa_info():
 def prompt_visa_info():
     st.session_state['user']["messages"].append({"role": "user", "content": st.session_state['prompt']})
     st.chat_message("user").write(st.session_state['prompt'])
-    res = requests.post(os.environ["VISAINFO_ENDPOINT"]+"queryvisainfo", json = {
+    res = requests.post(os.environ["VISAINFO_API_ENDPOINT"]+"queryvisainfo", json = {
         "query": st.session_state['prompt'],
         "destination": st.session_state['destination'],
         "passport": st.session_state['passport'],
@@ -64,7 +65,7 @@ def prompt_visa_info():
     st.session_state['user']["messages"].append({"role": "assistant", "content": msg})
 
 if 'user' not in st.session_state:
-    st.session_state['user'] = requests.get(os.environ["VISAINFO_ENDPOINT"]+"getuser").json()
+    st.session_state['user'] = requests.get(os.environ["VISAINFO_API_ENDPOINT"]+"getuser").json()
 if 'state' not in st.session_state:
     st.session_state['state'] = 0
 if 'prompt' not in st.session_state:
@@ -106,7 +107,7 @@ for idx, msg in enumerate(st.session_state['user']["messages"]):
                             st.toast("Thanks for the positive feedback, we hope VisaInfo.chat has made it easier for you to find your visa!")
                         else:
                             st.toast("Thank you for the negative feedback and actively making VisaInfo.chat more accurate.")
-                        requests.post(os.environ["VISAINFO_ENDPOINT"]+"feedback", json = {
+                        requests.post(os.environ["VISAINFO_API_ENDPOINT"]+"feedback", json = {
                             "feedback_id": st.session_state['user']["messages"][idx]["feedback_id"],
                             "thumbs_up": thumbs_up,
                             "sess_id": st.session_state['user']["user_id"]
